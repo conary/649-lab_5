@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <!--optional color scales, you can specify your own color scale-->
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<style>
+
+</style>
+</head>
+<body>
+<div class="chart1"></div>
+
+<script>
+
+w = window.innerWidth;
+h = 500
+margin = {top: 70, right: 100, bottom: 200, left: 70}
+width = w -  margin.left - margin.right
+height = h - margin.top - margin.bottom
+
+//set the ranges
+var x = d3.scaleBand()
+		.range([0, width])
+		.padding(0.1);
+var y = d3.scaleLinear()
+		.range([height, 0]);
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.bottom + margin.top)
+	.append("g")
+	.attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+
+function addScales() {
+        svg.append("g")
+            .attr("class", "x_axis")
+            .attr("transform", 
+               "translate(0," + height + ")")
+            .call(d3.axisBottom(x))
+            svg.append("g")
+            .attr("class", "y_axis")
+            .call(d3.axisLeft(y))
+    }
+
+function drawBars(data) {
+        bars = svg.selectAll("rect.bar")
+            .data(data, (d) => d.meanRating)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("y", (d) => y(d.meanRating))
+            .attr("height", (d) => height - y(d.meanRating))
+            .attr("x", (d) => x(d.key))
+            .attr("width", x.bandwidth())
+    }
+
+  
+    d3.json("movies_lab5.json", function(error, data) {
+        if (error) throw error;
+
+
+            var movie_data = d3.nest().key(function(d) {return d.Director;})
+              .entries(data);
+
+              for(var i = 0; i < movie_data.length; i++){
+              var directorInfo=movie_data[i]
+              var directorMovies=movie_data[i]["values"]
+              var imdbARR=[]
+                  for(var j = 0; j < directorMovies.length; j++){
+                  var rating = directorMovies[j]["IMDB Rating"]
+                  imdbARR.push(rating);
+                  }
+              var mean_rating = d3.mean(imdbARR);
+              directorInfo.meanRating=mean_rating
+              }
+
+            //console.log(movie_data)
+
+
+            //console.log(ratingByDirector);
+
+
+            x.domain(movie_data.map(function(d) { return d.key;}));
+            y.domain([0, d3.max(movie_data, function(d) { return d.meanRating; })]);
+
+            addScales()
+            drawBars(movie_data)		
+
+
+            });
+
+
+
+
+</script>
+
+
+
+</body>
+</html>
