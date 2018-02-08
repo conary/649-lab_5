@@ -143,6 +143,19 @@ svg.append("rect")
 
 }
 
+function addButton () {
+
+var select = d3.select('body').append('select')
+
+var options = select
+  .selectAll('option')
+  .data(["Director Name", "Average IMDB RATING", "Average Production Budget", "MovieCount"])
+  .enter()
+  .append('option')
+    .text(function (d) { return d; })
+    .attr("value", function (d) { return d; });
+
+}
   
     d3.json("movies_lab5.json", function(error, data) {
         if (error) throw error;
@@ -184,9 +197,11 @@ svg.append("rect")
             drawBars(movie_data)
             drawYAxis()	
             //gradient()
+            addButton()
 
 
             });
+
 
 
 
