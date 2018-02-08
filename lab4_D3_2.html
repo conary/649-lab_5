@@ -41,7 +41,7 @@
 
 w = window.innerWidth;
 h = 500
-margin = {top: 20, right: 40, bottom: 70, left: 80}
+margin = {top: 20, right: 40, bottom: 100, left: 80}
 width = w -  margin.left - margin.right
 height = h - margin.top - margin.bottom
 
@@ -62,7 +62,7 @@ var svg = d3.select(".chart1").append("svg")
 	.attr("transform",
 		"translate(" + margin.left + "," + margin.top + ")");
 
-var red = d3.scaleSequential(d3.interpolateReds).domain([0,10]);
+var reds = d3.scaleSequential(d3.interpolateReds).domain([0,150000000]);
 
 // Set the title
 svg.append("text")
@@ -71,13 +71,13 @@ svg.append("text")
    .style("text-anchor", "middle")
    .text( "Average IMDb rating of each director");
 
+// Add the X Axis
 function drawXAxis() {
         svg.append("g")
             .attr("class", "x_axis")
             .attr("transform", 
                "translate(0," + height + ")")
             .call(d3.axisBottom(x))
-
             .selectAll("text")
               .style("text-anchor", "end")
               .attr("dx", "-.8em")
@@ -86,6 +86,7 @@ function drawXAxis() {
 
   }
 
+// Add the Y Axis
 function drawYAxis() {        
   svg.append("g")
             .attr("class", "y_axis")
@@ -104,8 +105,43 @@ function drawBars(data) {
             .attr("height", (d) => height - y(d.meanRating))
             .attr("x", (d) => x(d.key))
             .attr("width", x.bandwidth())
-            .attr("fill", function(d) { return red(d.meanRating);});
-    }
+            .attr("fill", function(d) { return reds(d.meanBudget);});
+}
+
+function gradient () {
+
+//Append a defs (for definition) element to your SVG
+var defs = svg.append("defs");
+
+//Append a linearGradient element to the defs and give it a unique id
+var linearGradient = defs.append("linearGradient")
+    .attr("id", "linear-gradient");
+
+//Horizontal gradient
+linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+//Set the color for the start (0%)
+linearGradient.append("stop") 
+    .attr("offset", "0%")   
+    .attr("stop-color", "#ffa474"); //light blue
+
+//Set the color for the end (100%)
+linearGradient.append("stop") 
+    .attr("offset", "100%")   
+    .attr("stop-color", "#8b0000"); //dark blue
+
+//Draw the rectangle and fill with gradient
+svg.append("rect")
+  .attr("width", 300)
+  .attr("height", 20)
+  .style("fill", "url(#linear-gradient)");    
+
+
+}
 
   
     d3.json("movies_lab5.json", function(error, data) {
@@ -120,15 +156,22 @@ function drawBars(data) {
               var directorInfo=movie_data[i]
               var directorMovies=movie_data[i]["values"]
               var imdbARR=[]
+              var budgetARR=[]
                   for(var j = 0; j < directorMovies.length; j++){
                   var rating = directorMovies[j]["IMDB Rating"]
+                  var prodBudget = directorMovies[j]["Production Budget"]
                   imdbARR.push(rating);
+                  budgetARR.push(prodBudget);
                   }
+
               var mean_rating = d3.mean(imdbARR);
+              var mean_prod_budget = d3.mean(budgetARR);
+
               directorInfo.meanRating=mean_rating
+              directorInfo.meanBudget=mean_prod_budget
               }
 
-            //console.log(movie_data)
+            console.log(movie_data)
 
 
             //console.log(ratingByDirector);
@@ -140,6 +183,7 @@ function drawBars(data) {
             drawXAxis()
             drawBars(movie_data)
             drawYAxis()	
+            //gradient()
 
 
             });
