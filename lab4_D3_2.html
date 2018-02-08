@@ -166,7 +166,8 @@ var options = select
   .append('option')
     .text(function (d) { return d; })
     .attr("value", function (d) { return d; });
-
+console.log(select)
+console.log(options)
 }
 
 function addButton () {
@@ -224,6 +225,7 @@ function sortData () {
             drawYAxis()	
             //gradient()
             addDropDown()
+
             addButton()
          
 
