@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <title>Lab 5</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
     <!--optional color scales, you can specify your own color scale-->
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-
 <style>
+
+
 
   
 
@@ -20,8 +22,16 @@
 </style>
 </head>
 <body>
+
 <div class="chart1"></div>
-<div><p>Hello</p></div>
+<!-- <div id="option">
+<input name="updateButton"
+           type="button"
+           value="Sort Bars"
+           onclick="sortData()"
+/> 
+</div> -->
+
 <script>
 
 //Some testing
@@ -63,6 +73,8 @@ var svg = d3.select(".chart1").append("svg")
 		"translate(" + margin.left + "," + margin.top + ")");
 
 var reds = d3.scaleSequential(d3.interpolateReds).domain([0,150000000]);
+
+
 
 // Set the title
 svg.append("text")
@@ -143,19 +155,33 @@ svg.append("rect")
 
 }
 
-function addButton () {
+function addDropDown () {
 
 var select = d3.select('body').append('select')
 
 var options = select
   .selectAll('option')
-  .data(["Director Name", "Average IMDB RATING", "Average Production Budget", "MovieCount"])
+  .data(["Director Name", "Average IMDB Rating", "Average Production Budget", "MovieCount"])
   .enter()
   .append('option')
     .text(function (d) { return d; })
     .attr("value", function (d) { return d; });
 
 }
+
+function addButton () {
+$("body").append("<button type='button' onclick='sortData'>Sort Bars</button>");
+
+}
+
+function sortData () {
+
+
+
+} 
+
+
+
   
     d3.json("movies_lab5.json", function(error, data) {
         if (error) throw error;
@@ -197,10 +223,13 @@ var options = select
             drawBars(movie_data)
             drawYAxis()	
             //gradient()
+            addDropDown()
             addButton()
+         
 
 
             });
+
 
 
 
