@@ -108,6 +108,9 @@ function drawYAxis() {
 
 
 function drawBars(data) {
+        t = d3.transition()
+          .duration(850)
+
         x.domain(data.map(function(d) { return d.key;}));
         svg.select("g.x_axis")
             .call(d3.axisBottom(x))
@@ -119,10 +122,10 @@ function drawBars(data) {
           
           //EXIT (elements to be removed)          
           bars.exit()
+            .transition(t)
             .attr("class", "exit")
             .attr("x", (d) => x(d.key))
             .attr("width", x.bandwidth())
-
             .remove();
 
           axis.exit()
@@ -141,6 +144,7 @@ function drawBars(data) {
 
           //UPDATE (elements to be updated)  
           bars
+            .transition(t)
             .attr("y", (d) => y(d.meanRating))
             .attr("height", (d) => height - y(d.meanRating))
             .attr("x", (d) => x(d.key))
@@ -163,6 +167,7 @@ function drawBars(data) {
           //ENTER (elements to be created)
           bars.enter()
             .append("rect")
+            .transition(t)
             .attr("class", "bar")
             .attr("y", (d) => y(d.meanRating))
             .attr("height", (d) => height - y(d.meanRating))
@@ -314,7 +319,7 @@ function sortByField(field) {
               d3.select("body").append("button").on("click", sortData).text("sort");
             }
 
-            function sortData (detail) {
+            function sortData () {
               var comparator
               var selected = $("#fieldSelection").val();
               if (selected == "Average IMDB Rating") {
