@@ -210,18 +210,22 @@ function sortByField(field) {
               var directorMovies=movie_data[i]["values"]
               var imdbARR=[]
               var budgetARR=[]
+              var movieCount
                   for(var j = 0; j < directorMovies.length; j++){
                   var rating = directorMovies[j]["IMDB Rating"]
                   var prodBudget = directorMovies[j]["Production Budget"]
                   imdbARR.push(rating);
                   budgetARR.push(prodBudget);
+                  movieCount = j;
                   }
 
               var mean_rating = d3.mean(imdbARR);
               var mean_prod_budget = d3.mean(budgetARR);
 
+
               directorInfo.meanRating=mean_rating
               directorInfo.meanBudget=mean_prod_budget
+              directorInfo.movieCount=(movieCount + 1)
               }
 
             //console.log(movie_data)
@@ -247,11 +251,32 @@ function sortByField(field) {
             }
 
             function sortData (detail) {
+              var comparator
               var selected = $("#fieldSelection").val();
+              if (selected == "Average IMDB Rating") {
+                comparator = "meanRating"
+                console.log("meanRating")
+              }
+              if (selected == "Average Production Budget") {
+                comparator = "meanBudget"
+                console.log("meanBudget")
+              }
+              if (selected == "Director Name") {
+                comparator = "key"
+                console.log("key")
+              }
+              if (selected == "Movie Count") {
+                comparator = "movieCount"
+                console.log("movieCount")
+              }
+            
               //sortByField(selected);
-              console.log(data)
-              console.log(selected)
-              console.log("working")
+              //console.log(movie_data)
+              //console.log(selected)
+              //console.log("working")
+              movie_data.sort((a, b) => a[comparator] > b[comparator] ? -1 : +(a[comparator] < b[comparator]))
+              console.log(movie_data)
+
             } 
             //document.querySelector('select[name="fields"]').onchange = sortData();
 
