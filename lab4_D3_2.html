@@ -82,7 +82,6 @@ function drawBars(data) {
         svg.select("g.x_axis")
             .call(d3.axisBottom(x))
 
-
         bars = svg.selectAll("rect.bar")
             .data(data, (d) => d.meanRating)
         axis = svg.selectAll("g.x_axis")
@@ -105,9 +104,7 @@ function drawBars(data) {
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)")
-
               .remove();
-
 
           //UPDATE (elements to be updated)  
           bars
@@ -117,7 +114,6 @@ function drawBars(data) {
             .attr("x", (d) => x(d.key))
             .attr("width", x.bandwidth());
 
-          //svg.append("g")
           axis
             .attr("class", "x_axis")
             .attr("transform", 
@@ -129,7 +125,10 @@ function drawBars(data) {
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)");
 
-
+          svg.selectAll("rect.bar")
+            .on("mouseover", (d) => infobox.html(
+              "Director: " + d.key + "<br>" + "Movie Ct: " + d.count + "<br>" + "Avg. IMDB Rating: " + d.meanRating + "<br>" + "Avg. Production Budget: " + d.meanBudget))
+            .on("mouseout", (d) => infobox.text(""));
 
           //ENTER (elements to be created)
           bars.enter()
@@ -141,11 +140,7 @@ function drawBars(data) {
             .attr("x", (d) => x(d.key))
             .attr("width", x.bandwidth())
             .attr("fill", function(d) { return reds(d.meanBudget);})
-            //.on("mouseover", handleMouseOver())
 
-          svg.selectAll("rect.bar")
-            .on("mouseover", (d) => infobox.text(d.key))
-            .on("mouseout", (d) => infobox.text(""));
           //draw x-axis
           svg.append("g")
             .attr("class", "x_axis")
@@ -157,8 +152,6 @@ function drawBars(data) {
               .attr("dx", "-.8em")
               .attr("dy", ".15em")
               .attr("transform", "rotate(-65)");
-
-
 }
 
 function gradient () {
@@ -193,23 +186,7 @@ svg.append("rect")
   .attr("height", 20)
   .style("fill", "url(#linear-gradient)");    
 
-
 }
-/*
-function addDropDown () {
-
-var select = d3.select('body').append('select')
-
-var options = select
-  .selectAll('option')
-  .data(["Director Name", "Average IMDB Rating", "Average Production Budget", "MovieCount"])
-  .enter()
-  .append('option')
-    .text(function (d) { return d; })
-    .attr("value", function (d) { return d; });
-console.log(options)
-}
-*/
 
 function addDropDown () {
  $("body").append("<div><select name='fields' id='fieldSelection'></select></div>");
@@ -218,10 +195,9 @@ function addDropDown () {
         $("#fieldSelection").append("<option value='" + fields[i] + "'>" + fields[i] + "</option>");
     }
 }
-  
+
     d3.json("movies_lab5.json", function(error, data) {
         if (error) throw error;
-
 
             var movie_data = d3.nest().key(function(d) {return d.Director;})
               .entries(data);
@@ -248,14 +224,10 @@ function addDropDown () {
 
               var mean_rating = d3.mean(imdbARR);
               var mean_prod_budget = d3.mean(budgetARR);
-
-
               directorInfo.meanRating=mean_rating
               directorInfo.meanBudget=mean_prod_budget
               directorInfo.movieCount=(movieCount + 1)
               directorInfo.dirGenre=genreARR
-              //console.log(directorMovies)
-              //window.g_list = g_list
  
               for (movies of directorMovies){
                 genre = movies["Major Genre"]
@@ -264,23 +236,14 @@ function addDropDown () {
                   genreList.push(genre)
                 }
               }
-
               }
-
-            console.log(genreList)
-
-
-            //console.log(ratingByDirector);
 
             // Scale the range of the data
             x.domain(movie_data.map(function(d) { return d.key;}));
             y.domain([0, d3.max(movie_data, function(d) { return d.meanRating; })]);
 
             //drawXAxis()
-            
             drawBars(movie_data)
-            //handleMouseOver()
-            //handleMouseOut()
             drawYAxis()	
             gradient()
             addDropDown()
@@ -293,7 +256,6 @@ function addDropDown () {
 
               d3.select("body").append("button").on("click", sortData).text("sort");
             }
-
 
             function addGenreDropDown () {
              $("body").append("<div><select name='majorGenres' id='genreSelection'></select></div>");
@@ -347,12 +309,6 @@ function addDropDown () {
 
             } 
           });
-
-
-
-
-
-
 </script>
 
 
