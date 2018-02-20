@@ -9,10 +9,6 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <style>
 
-
-
-  
-
 .chart text {
   fill: white;
   font: 10px sans-serif;
@@ -34,29 +30,11 @@
 
 <script>
 
-//Some testing
-
-
-
-// Update…
-
-
-
-
-
-//--until here
-
-
-
-
 w = window.innerWidth;
 h = 500
 margin = {top: 20, right: 40, bottom: 100, left: 80}
 width = w -  margin.left - margin.right
 height = h - margin.top - margin.bottom
-
-
-
 
 //set the ranges
 var x = d3.scaleBand()
@@ -74,39 +52,28 @@ var svg = d3.select(".chart1").append("svg")
 
 var reds = d3.scaleSequential(d3.interpolateReds).domain([0,150000000]);
 
-
-
+infobox = d3.select("body")
+             .append("div")
+             .style("margin", "1em")
+             .style("background-color", "#ddd")
+             .style("padding", "1em")
+             .style("height", "15em")
+             .style("width", "15em")
+             .html("Director: " + "<br>" + "Movie Ct: " + "<br>" + "Avg. IMDB Rating: " + "<br>" + "Avg. Production Budget: ")
+      
 // Set the title
 svg.append("text")
    .attr("x", w / 2 )
    .attr("y", 0)
    .style("text-anchor", "middle")
    .text( "Average IMDb rating of each director");
-/*
-// Add the X Axis
-function drawXAxis() {
-        svg.append("g")
-            .attr("class", "x_axis")
-            .attr("transform", 
-               "translate(0," + height + ")")
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-              .style("text-anchor", "end")
-              .attr("dx", "-.8em")
-              .attr("dy", ".15em")
-              .attr("transform", "rotate(-65)");
 
-  }
-*/
 // Add the Y Axis
 function drawYAxis() {        
   svg.append("g")
             .attr("class", "y_axis")
             .call(d3.axisLeft(y))
           }
-
-
-
 function drawBars(data) {
         t = d3.transition()
           .duration(850)
@@ -174,7 +141,11 @@ function drawBars(data) {
             .attr("x", (d) => x(d.key))
             .attr("width", x.bandwidth())
             .attr("fill", function(d) { return reds(d.meanBudget);})
+            //.on("mouseover", handleMouseOver())
 
+          svg.selectAll("rect.bar")
+            .on("mouseover", (d) => infobox.text(d.key))
+            .on("mouseout", (d) => infobox.text(""));
           //draw x-axis
           svg.append("g")
             .attr("class", "x_axis")
@@ -247,24 +218,6 @@ function addDropDown () {
         $("#fieldSelection").append("<option value='" + fields[i] + "'>" + fields[i] + "</option>");
     }
 }
-/*
-function addButton (data) {
-$("body").append("<button type='button' onclick='sortData(data)'>Sort Bars</button>");
-//console.log(data)
-}
-*/
-
-
-
-function sortByField(field) {
-        mvData.sort(function (a, b) {
-            var a_revenue = a[field];
-            var b_revenue = b[field];
-            return (a_revenue < b_revenue) ? 1 : (a_revenue > b_revenue) ? -1 : 0;
-        });
-    }
-
-
   
     d3.json("movies_lab5.json", function(error, data) {
         if (error) throw error;
@@ -273,18 +226,23 @@ function sortByField(field) {
             var movie_data = d3.nest().key(function(d) {return d.Director;})
               .entries(data);
               //console.log(movie_data)
-
+              var genreList = []
               for(var i = 0; i < movie_data.length; i++){
+              
               var directorInfo=movie_data[i]
               var directorMovies=movie_data[i]["values"]
               var imdbARR=[]
               var budgetARR=[]
+              var genreARR=[]
+
               var movieCount
                   for(var j = 0; j < directorMovies.length; j++){
                   var rating = directorMovies[j]["IMDB Rating"]
                   var prodBudget = directorMovies[j]["Production Budget"]
+                  var directorGenre = directorMovies[j]["Major Genre"]
                   imdbARR.push(rating);
                   budgetARR.push(prodBudget);
+                  genreARR.push(directorGenre)
                   movieCount = j;
                   }
 
@@ -295,9 +253,21 @@ function sortByField(field) {
               directorInfo.meanRating=mean_rating
               directorInfo.meanBudget=mean_prod_budget
               directorInfo.movieCount=(movieCount + 1)
+              directorInfo.dirGenre=genreARR
+              //console.log(directorMovies)
+              //window.g_list = g_list
+ 
+              for (movies of directorMovies){
+                genre = movies["Major Genre"]
+
+                if (genreList.indexOf(genre) == -1){
+                  genreList.push(genre)
+                }
               }
 
-            //console.log(movie_data)
+              }
+
+            console.log(genreList)
 
 
             //console.log(ratingByDirector);
@@ -309,14 +279,47 @@ function sortByField(field) {
             //drawXAxis()
             
             drawBars(movie_data)
+            //handleMouseOver()
+            //handleMouseOut()
             drawYAxis()	
             gradient()
             addDropDown()
             addButton(movie_data)
+            addGenreDropDown()
+            addSortButton
+            (movie_data)
 
             function addButton (data) {
 
               d3.select("body").append("button").on("click", sortData).text("sort");
+            }
+
+
+            function addGenreDropDown () {
+             $("body").append("<div><select name='majorGenres' id='genreSelection'></select></div>");
+                var majorGenres = genreList;
+                for (var i = 0; i < majorGenres.length; i++) {
+                    $("#genreSelection").append("<option value='" + majorGenres[i] + "'>" + majorGenres[i] + "</option>");
+                    //console.log(g_list)
+                }
+            }
+            function addSortButton(data){
+                  d3.select("body").append("button").on("click", redrawBars).text("Select A Genre");
+              }
+            
+            function redrawBars(){
+
+              function filterByGenre(){
+                var gen_selected = document.getElementById("genreSelection").value;
+                var filtered=[]
+                for(var i = 0; i < movie_data.length; i++){
+                  if(movie_data[i]["dirGenre"].includes(gen_selected)){
+                    filtered.push(movie_data[i]);
+                  };
+                }
+            drawBars(filtered);
+              }
+            filterByGenre()
             }
 
             function sortData () {
@@ -338,23 +341,12 @@ function sortByField(field) {
                 comparator = "movieCount"
                 console.log("movieCount")
               }
-            
-              //sortByField(selected);
-              //console.log(movie_data)
-              //console.log(selected)
-              //console.log("working")
+
               movie_data.sort((a, b) => a[comparator] > b[comparator] ? -1 : +(a[comparator] < b[comparator]))
-              console.log(movie_data)
-              //drawXAxis();
-            
              drawBars(movie_data);
-            //drawYAxis();
-              console.log("helau")
 
             } 
-            //document.querySelector('select[name="fields"]').onchange = sortData();
-
-            });
+          });
 
 
 
